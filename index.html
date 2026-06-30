@@ -1,127 +1,782 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DINGTREN Logistics | Tracker</title>
+
+    <title>DINGTREN Logistics | Return Tracker</title>
+
     <script src="https://unpkg.com/html5-qrcode"></script>
+
     <style>
-        :root { --bg-dark: #0f172a; --panel: #1e293b; --accent: #3b82f6; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --text-main: #f8fafc; --text-muted: #94a3b8; --border: #334155; }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 20px 10px; }
+
+        /* Premium Dark Theme */
+
+        :root {
+
+            --bg-dark: #0f172a;
+
+            --panel: #1e293b;
+
+            --accent: #3b82f6;
+
+            --success: #10b981;
+
+            --warning: #f59e0b;
+
+            --danger: #ef4444;
+
+            --text-main: #f8fafc;
+
+            --text-muted: #94a3b8;
+
+            --border: #334155;
+
+        }
+
+
+
+        body {
+
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+            background-color: var(--bg-dark);
+
+            color: var(--text-main);
+
+            margin: 0;
+
+            padding: 20px 10px;
+
+        }
+
+
+
+        .header { text-align: center; margin-bottom: 20px; }
+
+        .header h1 { margin: 0; color: var(--text-main); font-size: 1.8rem; letter-spacing: 1px; }
+
+        .header p { margin: 5px 0 0; color: var(--accent); font-size: 0.9rem; font-weight: bold; text-transform: uppercase; }
+
+
+
         .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr; gap: 20px; }
+
         @media (min-width: 800px) { .container { grid-template-columns: 450px 1fr; } }
-        .panel { background: var(--panel); padding: 20px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        h4 { margin: 15px 0 10px 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; }
-        #reader { width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent); background: #000; min-height: 250px; }
+
+
+
+        .panel {
+
+            background: var(--panel); padding: 20px; border-radius: 16px;
+
+            border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+        }
+
+
+
+        h2 { margin-top: 0; color: var(--text-main); font-size: 1.2rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+        h4 { margin: 15px 0 10px 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+
+
+        /* Camera */
+
+        #reader {
+
+            width: 100%; border-radius: 12px; overflow: hidden; border: 2px solid var(--accent);
+
+            background: #000; min-height: 250px; display: flex; align-items: center; justify-content: center;
+
+        }
+
+        
+
         .form-group { margin-top: 15px; }
+
         label { display: block; margin-bottom: 5px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
-        input, select { width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 8px; color: var(--text-main); font-size: 0.95rem; }
-        button { width: 100%; background: linear-gradient(135deg, var(--accent), #2563eb); color: white; padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 20px; text-transform: uppercase; }
+
+        
+
+        input, select {
+
+            width: 100%; padding: 12px; background: var(--bg-dark); border: 1px solid var(--border);
+
+            border-radius: 8px; color: var(--text-main); font-size: 0.95rem; box-sizing: border-box; font-family: monospace;
+
+        }
+
+        input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+
+
+        button {
+
+            width: 100%; background: linear-gradient(135deg, var(--accent), #2563eb); color: white;
+
+            padding: 14px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold;
+
+            cursor: pointer; margin-top: 20px; text-transform: uppercase; letter-spacing: 1px; transition: 0.2s;
+
+        }
+
+        button:active { transform: scale(0.98); }
+
+
+
+        /* Dashboard Stats Grid */
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-bottom: 20px; }
+
         .stat-card { background: var(--bg-dark); padding: 15px 5px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+
         .stat-card h3 { margin: 0; font-size: 1.5rem; }
-        .stat-card p { margin: 5px 0 0; font-size: 0.65rem; color: var(--text-muted); font-weight: bold; }
-        .courier-pill { background: var(--bg-dark); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; display: inline-block; margin: 4px; }
-        .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--danger); }
+
+        .stat-card p { margin: 5px 0 0; font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: bold; }
+
+        
+
+        .text-rto { color: var(--warning); }
+
+        .text-cust { color: var(--success); }
+
+        .text-accent { color: var(--accent); }
+
+        .text-danger { color: var(--danger); }
+
+
+
+        /* Courier Breakdown */
+
+        .courier-stats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+
+        .courier-pill { background: var(--bg-dark); border: 1px solid var(--border); padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; color: var(--text-main); }
+
+        .courier-pill span { font-weight: bold; margin-left: 5px; }
+
+        .pill-total span { color: var(--warning); }
+
+        .pill-cust { border-color: rgba(16, 185, 129, 0.5); }
+
+        .pill-cust span { color: var(--success); }
+
+
+
+        /* Table */
+
+        .table-wrap { overflow-x: auto; margin-top: 15px; }
+
         table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
         th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+
+        th { color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; }
+
+        
+
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+
+        .bg-rto { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
+        .bg-cust { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+
+        
+
+        .btn-delete { background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 5px 10px; border-radius: 6px; cursor: pointer; border: 1px solid var(--danger); }
+
     </style>
+
 </head>
+
 <body>
 
-<div style="text-align: center; margin-bottom: 20px;"><h1>RETURNS DASHBOARD</h1><p>Operator: Himanshu | Dingtren Enterprises</p></div>
 
-<div class="container">
-    <div class="panel">
-        <h2>Live Scanner</h2>
-        <div id="reader"></div>
-        <div class="form-group"><label>AWB Number</label><input type="text" id="awbInput" placeholder="Scan AWB..."></div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div class="form-group"><label>Type</label><select id="returnType"><option>Customer Return</option><option>RTO</option></select></div>
-            <div class="form-group"><label>Courier</label><select id="courierPartner"><option>Valmo</option><option>Shadowfax</option><option>Delhivery</option><option>Ecom Express</option><option>Xpressbees</option></select></div>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(59,130,246,0.05); padding: 10px; border-radius: 8px; margin-top: 15px;">
-            <div class="form-group" style="margin-top:0;"><label>OTP Given</label><input type="number" id="qtyOtp" value="0"></div>
-            <div class="form-group" style="margin-top:0;"><label>Actual Receive</label><input type="number" id="qtyReceived" value="0"></div>
-        </div>
-        <button onclick="saveData()">Log Parcel</button>
-    </div>
 
-    <div class="panel">
-        <h2>Today's Analytics</h2>
-        <div class="stats-grid">
-            <div class="stat-card"><h3 id="statOtpGiven" style="color:var(--accent)">0</h3><p>OTP Given</p></div>
-            <div class="stat-card"><h3 id="statActualRec" style="color:var(--success)">0</h3><p>Actual Receive</p></div>
-            <div class="stat-card"><h3 id="statCustRtn" style="color:var(--success)">0</h3><p>Customer Rtn</p></div>
-            <div class="stat-card"><h3 id="statRTO" style="color:var(--warning)">0</h3><p>Total RTO</p></div>
-        </div>
-        <h4>RTO by Courier</h4><div id="rtoCourierBreakdown"></div>
-        <h4>Customer Returns by Courier</h4><div id="custCourierBreakdown"></div>
-        <div class="table-wrap">
-            <table><thead><tr><th>AWB / Time</th><th>Type</th><th>Courier</th><th>Action</th></tr></thead><tbody id="tableBody"></tbody></table>
-        </div>
-    </div>
+<div class="header">
+
+    <h1>RETURNS DASHBOARD</h1>
+
+    <p>Operator: Himanshu | Dingtren Enterprises</p>
+
 </div>
 
+
+
+<div class="container">
+
+    
+
+    <!-- LEFT PANEL: DATA ENTRY -->
+
+    <div class="panel">
+
+        <h2>Live Scanner</h2>
+
+        <div id="reader">Initializing Camera...</div>
+
+        
+
+        <div class="form-group">
+
+            <label>Scanned AWB Number</label>
+
+            <input type="text" id="awbInput" placeholder="Awaiting scan..." required>
+
+        </div>
+
+        
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+
+            <div class="form-group">
+
+                <label>Return Type</label>
+
+                <select id="returnType">
+
+                    <option value="Customer Return">Customer Return</option>
+
+                    <option value="RTO">Courier RTO</option>
+
+                </select>
+
+            </div>
+
+            <div class="form-group">
+
+                <label>Courier</label>
+
+                <select id="courierPartner">
+
+                    <option value="Valmo">Valmo</option>
+
+                    <option value="Shadowfax">Shadowfax</option>
+
+                    <option value="Ecom Express">Ecom Express</option>
+
+                    <option value="Delhivery">Delhivery</option>
+
+                    <option value="Xpressbees">Xpressbees</option>
+
+                    <option value="Other">Other</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(59, 130, 246, 0.05); padding: 10px; border-radius: 8px; margin-top: 15px; border: 1px solid rgba(59, 130, 246, 0.2);">
+
+            <div class="form-group" style="margin-top: 0;">
+
+                <label style="color: var(--accent);">OTP Given</label>
+
+                <input type="number" id="qtyOtp" value="0" min="0" style="text-align: center; font-weight: bold;">
+
+            </div>
+
+            <div class="form-group" style="margin-top: 0;">
+
+                <label style="color: var(--success);">Actual Receive</label>
+
+                <input type="number" id="qtyReceived" value="0" min="0" style="text-align: center; font-weight: bold;">
+
+            </div>
+
+        </div>
+
+
+
+        <button onclick="saveData()">Log Parcel</button>
+
+    </div>
+
+
+
+    <!-- RIGHT PANEL: DASHBOARD -->
+
+    <div class="panel">
+
+        <h2>Today's Live Analytics</h2>
+
+        
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+
+                <h3 id="statOtpGiven" class="text-accent">0</h3>
+
+                <p>OTP Given</p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3 id="statActualRec" class="text-cust">0</h3>
+
+                <p>Actual Receive</p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3 id="statCustRtn" class="text-cust">0</h3>
+
+                <p>Customer Rtn</p>
+
+            </div>
+
+            <div class="stat-card">
+
+                <h3 id="statRTO" class="text-rto">0</h3>
+
+                <p>Total RTO</p>
+
+            </div>
+
+            <div class="stat-card" style="border-color: var(--danger); background: rgba(239, 68, 68, 0.05);">
+
+                <h3 id="statMissing" class="text-danger">0</h3>
+
+                <p>Missing Items</p>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- RTO COURIER STATS -->
+
+        <h4>RTO by Courier</h4>
+
+        <div class="courier-stats" id="rtoCourierBreakdown"></div>
+
+
+
+        <!-- CUSTOMER RETURN COURIER STATS -->
+
+        <h4>Customer Returns by Courier</h4>
+
+        <div class="courier-stats" id="custCourierBreakdown"></div>
+
+
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; border-top: 1px solid var(--border); padding-top: 15px; margin-top: 15px;">
+
+            <div>
+
+                <label>Filter Date</label>
+
+                <input type="date" id="filterDate" onchange="renderDashboard()">
+
+            </div>
+
+            <div>
+
+                <label>Filter Courier</label>
+
+                <select id="filterCourier" onchange="renderDashboard()">
+
+                    <option value="All">All Partners</option>
+
+                    <option value="Valmo">Valmo</option>
+
+                    <option value="Shadowfax">Shadowfax</option>
+
+                    <option value="Ecom Express">Ecom Express</option>
+
+                    <option value="Delhivery">Delhivery</option>
+
+                    <option value="Xpressbees">Xpressbees</option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+
+
+        <h2>Recent Scans</h2>
+
+        <div class="table-wrap">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>AWB / Time</th>
+
+                        <th>Type</th>
+
+                        <th>Courier</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="tableBody">
+
+                    <!-- Rows populate here -->
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+
 <script>
-    // Initialize Scanner
+
+    // --- 1. CAMERA ENGINE ---
+
     const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: 200 }, (txt) => { document.getElementById('awbInput').value = txt; });
+
+    function startCamera() {
+
+        const config = { fps: 20, qrbox: { width: 250, height: 100 }, formatsToSupport: [ Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.EAN_13 ] };
+
+        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess).catch(err => {
+
+            document.getElementById("reader").innerHTML = "<p style='color:red; padding:20px; text-align:center;'>Camera blocked. Please allow permissions.</p>";
+
+        });
+
+    }
+
+
+
+    function onScanSuccess(decodedText) {
+
+        document.getElementById('awbInput').value = decodedText;
+
+        let audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU');
+
+        audio.play().catch(e => {});
+
+    }
+
+
+
+    window.onload = () => {
+
+        startCamera();
+
+        renderDashboard();
+
+    };
+
+
+
+    // --- 2. DATA MANAGEMENT (Error Fixed) ---
 
     function saveData() {
+
         const awb = document.getElementById('awbInput').value.trim();
-        if (!awb) return alert("Scan AWB first!");
+
+        const type = document.getElementById('returnType').value;
+
+        const courier = document.getElementById('courierPartner').value;
+
         
-        const entry = { 
-            id: Date.now(), 
-            date: new Date().toISOString().split('T')[0], 
-            time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}), 
-            awb, 
-            type: document.getElementById('returnType').value, 
-            courier: document.getElementById('courierPartner').value, 
-            otp: parseInt(document.getElementById('qtyOtp').value) || 0,
-            rec: parseInt(document.getElementById('qtyReceived').value) || 0
+
+        let qtyOtp = parseInt(document.getElementById('qtyOtp').value) || 0; 
+
+        let qtyReceived = parseInt(document.getElementById('qtyReceived').value) || 0;
+
+        
+
+        // FIX: Agar user normally scan karein bina QTY change kiye (0, 0 par), toh automatically 1 count ho jaye.
+
+        if (qtyOtp === 0 && qtyReceived === 0) {
+
+            qtyReceived = 1;
+
+        }
+
+
+
+        let missing = 0;
+
+        if (qtyOtp > qtyReceived) {
+
+            missing = qtyOtp - qtyReceived;
+
+        }
+
+
+
+        if (!awb) return alert("Please scan an AWB first!");
+
+
+
+        const now = new Date();
+
+        const dateStr = now.toISOString().split('T')[0]; 
+
+        const timeStr = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+
+
+        const newEntry = { 
+
+            id: Date.now(), date: dateStr, time: timeStr, awb, type, courier, 
+
+            qtyOtp: qtyOtp, qtyReceived: qtyReceived, missing: missing 
+
         };
 
-        let data = JSON.parse(localStorage.getItem('dingtrenReturns') || '[]');
-        data.unshift(entry);
-        localStorage.setItem('dingtrenReturns', JSON.stringify(data));
+
+
+        let data = JSON.parse(localStorage.getItem('dingtrenReturns')) || [];
+
         
-        document.getElementById('awbInput').value = "";
+
+        if (data.some(item => item.awb === awb && item.date === dateStr)) {
+
+            if(!confirm("AWB already scanned today! Save again?")) return;
+
+        }
+
+
+
+        data.unshift(newEntry);
+
+        localStorage.setItem('dingtrenReturns', JSON.stringify(data));
+
+        
+
+        // Reset inputs back to 0
+
+        document.getElementById('awbInput').value = ""; 
+
         document.getElementById('qtyOtp').value = "0";
+
         document.getElementById('qtyReceived').value = "0";
-        renderDashboard();
+
+        
+
+        renderDashboard(); 
+
     }
 
+
+
+    function deleteEntry(id) {
+
+        let data = JSON.parse(localStorage.getItem('dingtrenReturns')) || [];
+
+        data = data.filter(item => item.id !== id);
+
+        localStorage.setItem('dingtrenReturns', JSON.stringify(data));
+
+        renderDashboard();
+
+    }
+
+
+
+    // --- 3. ANALYTICS ENGINE (Backward Compatibility Fixed) ---
+
     function renderDashboard() {
-        let data = JSON.parse(localStorage.getItem('dingtrenReturns') || '[]');
-        let filtered = data.filter(i => i.date === new Date().toISOString().split('T')[0]);
-        let tOtp=0, tRec=0, tRto=0, tCust=0;
-        let rtoC={}, custC={};
+
+        let allData = JSON.parse(localStorage.getItem('dingtrenReturns')) || [];
+
         
-        filtered.forEach(i => {
-            tOtp += i.otp || 0; 
-            tRec += i.rec || 0;
-            if(i.type === 'RTO') { tRto += i.rec; rtoC[i.courier] = (rtoC[i.courier]||0) + i.rec; }
-            else { tCust += i.rec; custC[i.courier] = (custC[i.courier]||0) + i.rec; }
+
+        const filterDate = document.getElementById('filterDate').value;
+
+        const filterCourier = document.getElementById('filterCourier').value;
+
+        const todayStr = new Date().toISOString().split('T')[0];
+
+
+
+        let targetDate = filterDate || todayStr;
+
+        let filteredData = allData.filter(item => item.date === targetDate);
+
+
+
+        if (filterCourier !== "All") {
+
+            filteredData = filteredData.filter(item => item.courier === filterCourier);
+
+        }
+
+
+
+        let totalOtpGiven = 0;
+
+        let totalActualRec = 0;
+
+        let totalRTO = 0;
+
+        let totalCustRtn = 0;
+
+        let totalMissing = 0;
+
+        
+
+        let rtoCourierCounts = {};
+
+        let custCourierCounts = {};
+
+
+
+        const tbody = document.getElementById('tableBody');
+
+        tbody.innerHTML = "";
+
+
+
+        filteredData.forEach(item => {
+
+            // FIX: Ensure old data is accurately counted (defaults old items to 1)
+
+            let received = item.qtyReceived !== undefined ? item.qtyReceived : (item.qty || 1);
+
+            let otpQty = item.qtyOtp !== undefined ? item.qtyOtp : 0;
+
+            let missing = item.missing || 0;
+
+
+
+            totalOtpGiven += otpQty;
+
+            totalActualRec += received;
+
+            totalMissing += missing;
+
+            
+
+            if (item.type === 'RTO') {
+
+                totalRTO += received;
+
+                rtoCourierCounts[item.courier] = (rtoCourierCounts[item.courier] || 0) + received;
+
+            } else { 
+
+                totalCustRtn += received;
+
+                custCourierCounts[item.courier] = (custCourierCounts[item.courier] || 0) + received;
+
+            }
+
+
+
+            const badgeClass = item.type === 'RTO' ? 'bg-rto' : 'bg-cust';
+
+            
+
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+
+                <td>
+
+                    <span style="font-family: monospace; font-size: 1.05rem; color: #fff; font-weight:bold;">${item.awb}</span><br>
+
+                    <span style="color: var(--text-muted); font-size: 0.75rem;">${item.time}</span>
+
+                </td>
+
+                <td><span class="badge ${badgeClass}">${item.type}</span></td>
+
+                <td>${item.courier}</td>
+
+                <td><button class="btn-delete" onclick="deleteEntry(${item.id})">Del</button></td>
+
+            `;
+
+            tbody.appendChild(tr);
+
         });
-        
-        document.getElementById('statOtpGiven').innerText = tOtp;
-        document.getElementById('statActualRec').innerText = tRec;
-        document.getElementById('statCustRtn').innerText = tCust;
-        document.getElementById('statRTO').innerText = tRto;
-        
-        document.getElementById('tableBody').innerHTML = filtered.map(i => `<tr><td><strong>${i.awb}</strong><br>${i.time}</td><td>${i.type}</td><td>${i.courier}</td><td><button class="btn-delete" onclick="deleteEntry(${i.id})">Del</button></td></tr>`).join('');
-        document.getElementById('rtoCourierBreakdown').innerHTML = Object.entries(rtoC).map(([c,v]) => `<div class="courier-pill">${c}: ${v}</div>`).join('');
-        document.getElementById('custCourierBreakdown').innerHTML = Object.entries(custC).map(([c,v]) => `<div class="courier-pill">${c}: ${v}</div>`).join('');
+
+
+
+        // Update Dashboard Stats
+
+        document.getElementById('statOtpGiven').innerText = totalOtpGiven;
+
+        document.getElementById('statActualRec').innerText = totalActualRec;
+
+        document.getElementById('statCustRtn').innerText = totalCustRtn;
+
+        document.getElementById('statRTO').innerText = totalRTO;
+
+        document.getElementById('statMissing').innerText = totalMissing;
+
+
+
+        // RTO Courier Pills
+
+        const rtoCourierDiv = document.getElementById('rtoCourierBreakdown');
+
+        rtoCourierDiv.innerHTML = "";
+
+        for (const [courier, count] of Object.entries(rtoCourierCounts)) {
+
+            rtoCourierDiv.innerHTML += `<div class="courier-pill pill-total">${courier} (RTO): <span>${count}</span></div>`;
+
+        }
+
+        if(Object.keys(rtoCourierCounts).length === 0) {
+
+             rtoCourierDiv.innerHTML = "<span style='color: var(--text-muted); font-size: 0.8rem;'>No RTOs yet.</span>";
+
+        }
+
+
+
+        // Customer Return Courier Pills
+
+        const custCourierDiv = document.getElementById('custCourierBreakdown');
+
+        custCourierDiv.innerHTML = "";
+
+        for (const [courier, count] of Object.entries(custCourierCounts)) {
+
+            custCourierDiv.innerHTML += `<div class="courier-pill pill-cust">${courier} (Cust Rtn): <span>${count}</span></div>`;
+
+        }
+
+        if(Object.keys(custCourierCounts).length === 0) {
+
+             custCourierDiv.innerHTML = "<span style='color: var(--text-muted); font-size: 0.8rem;'>No Customer Returns yet.</span>";
+
+        }
+
     }
-    
-    function deleteEntry(id) { 
-        let data = JSON.parse(localStorage.getItem('dingtrenReturns') || '[]');
-        localStorage.setItem('dingtrenReturns', JSON.stringify(data.filter(i => i.id !== id))); 
-        renderDashboard(); 
-    }
+
 </script>
+
+
+
 </body>
-</html>
+
+</html> 
+
